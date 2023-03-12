@@ -15,7 +15,7 @@
 ; bărbaților și calculează lista bărbaților din problemă.
 ; Folosiți orice funcțională exceptând foldl/foldr.
 (define (get-men mpref)
-  'your-code-here)
+  (map car mpref))
 
 
 ; TODO 2
@@ -24,8 +24,11 @@
 ; femeilor și calculează lista femeilor din problemă.
 ; Folosiți foldl sau foldr, astfel încât să nu fie necesare
 ; operații de tip append sau reverse.
+
 (define (get-women wpref)
-  'your-code-here)
+  (foldr  (lambda (L res) (cons (car L) res))
+          '()
+          wpref))
 
 
 ; TODO 3
@@ -39,7 +42,8 @@
 ; (get-pref-list wpref 'ana) => '(bobo adi cos)
 ; Folosiți minim o funcțională și minim o funcție anonimă.
 (define (get-pref-list pref person)
-  'your-code-here)
+  (cdar (filter (lambda (L) (equal? (car L) person))
+          pref)))
 
 
 ; TODO 4
@@ -52,7 +56,9 @@
 ; și false în caz contrar.
 ; Folosiți funcția member.
 (define (preferable? pref-list x y)
-  'your-code-here)
+  (cond ((member x pref-list) => (lambda (L1) (cond ((member y pref-list) => (lambda (L2) (> (length L1) (length L2)))))))
+        ((member y pref-list) false)
+        (else false)))
 
 
 ; TODO 5
@@ -63,7 +69,9 @@
 ; Implementarea trebuie să fie eficientă în sensul că nu trebuie
 ; să continue explorarea listei odată ce s-a găsit elementul.
 (define (find-first p L)
-  'your-code-here)
+  (cond ((null? L) false)
+        ((p (car L)) (car L))
+        (else (find-first p (cdr L)))))
 
 
 ; TODO 6
@@ -74,8 +82,15 @@
 ; poziție într-o logodnă, este întors partenerul său, altfel se
 ; întoarce false.
 ; Folosiți find-first, fără să îl apelați de 2 ori (hint: define în define).
+
+(define (get-tail option-pair)
+  (and  (pair? option-pair)
+        (cdr option-pair)))
+
 (define (get-partner engagements person)
-  'your-code-here)
+  (get-tail (find-first (lambda (pair)
+                                (equal? person (car pair)))
+                        engagements)))
   
 
 ; TODO 7
@@ -86,7 +101,13 @@
 ; Dacă niciun element din L nu satisface predicatul, lista L
 ; rămâne neschimbată.
 (define (change-first p L val)
-  'your-code-here)
+  (cond ((null? L) null)
+        ((p (car L)) (cons  val
+                            (change-first (lambda (e) false)
+                                          (cdr L)
+                                          val)))
+        (else (cons (car L)
+                    (change-first p (cdr L) val)))))
 
 
 ; TODO 8
@@ -100,7 +121,9 @@
 ;   persoanele de același gen cu p1
 ; Folosiți change-first.
 (define (update-engagements engagements p1 p2)
-  'your-code-here)
+  (change-first (lambda (pair) (equal? (car pair) p1))
+                engagements
+                (cons p1 p2)))
 
 
 ; TODO
@@ -110,7 +133,12 @@
 ; Dacă nu ați implementat better-match-exists? în etapa 1, solicitați 
 ; o rezolvare de la asistent, astfel încât să puteți continua.
 (define (better-match-exists? p1 p2 p1-list pref2 engagements)
-  'your-code-here)
+  (if (equal? (car p1-list) p2)
+      false
+      (or (preferable?  (get-pref-list pref2 (car p1-list))
+                        p1
+                        (get-partner engagements (car p1-list)))
+          (better-match-exists? p1 p2 (cdr p1-list) pref2 engagements))))
 
 
 ; TODO 9
@@ -124,6 +152,16 @@
 ; Precizări (aspecte care se garantează, nu trebuie verificate):
 ; - fiecare cuplu din lista engagements are pe prima poziție
 ;   o femeie
+(define (stable-match-iter engagements mpref wpref L)
+  (if (null? L)
+      true
+      (and  (not (better-match-exists?  (cdar L)
+                                        (caar L)
+                                        (get-pref-list mpref (cdar L))
+                                        wpref
+                                        engagements))
+            (stable-match-iter engagements mpref wpref (cdr L)))))
+
 (define (stable-match? engagements mpref wpref)
-  'your-code-here)
+  (stable-match-iter engagements mpref wpref engagements))
 

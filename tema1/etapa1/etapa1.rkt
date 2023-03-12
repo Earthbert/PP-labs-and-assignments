@@ -97,6 +97,3 @@
                         p1
                         (get-partner engagements (car p1-list)))
           (better-match-exists? p1 p2 (cdr p1-list) pref2 engagements))))
-
-(trace get-men)
-(trace get-women)
