@@ -56,7 +56,17 @@
 ; veți defini funcții ajutătoare recursive).
 ; Folosiți let și/sau let* pentru a evita calcule duplicate.
 (define (engage free-men engagements mpref wpref)
-  'your-code-here)
+  (let ext-loop ((f-men free-men) (stable-matches engagements))
+                (if (null? f-men)
+                    stable-matches
+                    (let* ((m (car f-men)) (m-pref (get-pref-list mpref m)))
+                          (let int-loop ((m-p m-pref))
+                                            (let* ((w (car m-p)) (curr-m (get-partner stable-matches w)))
+                                                  (if (equal? curr-m false)
+                                                      (ext-loop (cdr f-men) (cons (cons w m) stable-matches))
+                                                      (if (preferable? (get-pref-list wpref w) m curr-m)
+                                                          (ext-loop (cons curr-m (cdr f-men)) (update-engagements stable-matches w m))
+                                                          (int-loop (cdr m-p))))))))))
 
 
 ; TODO 3
@@ -66,7 +76,8 @@
 ; de preferințe feminine wpref și calculează o listă completă de
 ; logodne stabile conform acestor preferințe.
 (define (gale-shapley mpref wpref)
-  'your-code-here)
+  (let  ((free-men (get-men mpref)))
+        (engage free-men null mpref wpref)))
 
 
 ; TODO 4
@@ -75,5 +86,7 @@
 ; care apar în perechi.
 ; Folosiți funcționale, fără recursivitate explicită.
 (define (get-couple-members pair-list)
-  'your-code-here)
+  (foldl  (lambda (pair acc) (cons (cdr pair) (cons (car pair) acc)))
+          null
+          pair-list))
 
