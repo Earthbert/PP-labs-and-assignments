@@ -142,7 +142,7 @@
             (lambda (n)
                     (cond ((or (= 2 n) (= 3 n)) false)
                           ((= 1 n) true)
-                          (else (or (player-turn (- n 2)) (player-turn (- n 3))))))))
+                          (else (and (player-turn (- n 2)) (player-turn (- n 3))))))))
           (player-turn candies)))
 
 (check% 'a 1/4 (player-wins? 2) is #t)
