@@ -22,19 +22,19 @@
 ; Folosiți una sau mai multe dintre expresiile let, let*, letrec,
 ; named let pentru a vă putea conforma acestor restricții.
 (define (get-unstable-couples engagements mpref wpref)
-(let ((rev-engagements (let rev-eng-iter ((eng engagements) (res null)) (if (null? eng)
+(let  ((rev-engagements (let rev-eng-iter ((eng engagements) (res null)) (if (null? eng)
                                                                     res
                                                                     (rev-eng-iter (cdr eng) (cons (cons (cdar eng)
                                                                                                         (caar eng))
                                                                                                   res))))))                                                                                                
-  (let get-unstable-couples-iter  ((L engagements) (res null))
-                                  (if (null? L)
-                                      res
-                                      (let  ((p1 (cdar L)) (p2 (caar L)))
-                                            (if (or (better-match-exists? p1 p2 (get-pref-list mpref p1) wpref engagements)
-                                                    (better-match-exists? p2 p1 (get-pref-list wpref p2) mpref rev-engagements))
-                                                (get-unstable-couples-iter (cdr L) (cons (car L) res))
-                                                (get-unstable-couples-iter (cdr L) res)))))))
+      (let get-unstable-couples-iter  ((L engagements) (res null))
+                                      (if (null? L)
+                                          res
+                                          (let  ((p1 (cdar L)) (p2 (caar L)))
+                                                (if (or (better-match-exists? p1 p2 (get-pref-list mpref p1) wpref engagements)
+                                                        (better-match-exists? p2 p1 (get-pref-list wpref p2) mpref rev-engagements))
+                                                    (get-unstable-couples-iter (cdr L) (cons (car L) res))
+                                                    (get-unstable-couples-iter (cdr L) res)))))))
 
 
 ; TODO 2
