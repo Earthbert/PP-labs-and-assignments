@@ -204,7 +204,10 @@
 ;; și lasă loc pentru mai puține erori?
 ;; list-num-concat:: listă de numere -> număr
 (define (list-num-concat numbers)
-  'your-code-here)
+  (let caca ((nums (cdr numbers)) (result (car numbers)))
+            (if (null? nums)
+                result
+                (caca (cdr nums) (num-concat result (car nums))))))
 
 ;; Definiți funcția care găsește toate sufixele posibile pentru un număr.
 ;; ex:
