@@ -1,1 +1,1 @@
-# PP-Racket
+# Programming Paradigms - Labs and Homeworks
