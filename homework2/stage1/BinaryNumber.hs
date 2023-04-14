@@ -124,7 +124,13 @@ dec (1 : xs) = 0 : xs
     197
 -}
 add :: BinaryNumber -> BinaryNumber -> BinaryNumber
-add bits1 bits2 = undefined
+add bits1 bits2 =
+  let addBit carry (0, 0) = if carry == 1 then (0, 1) else (0, 0)
+      addBit carry (0, 1) = if carry == 1 then (1, 0) else (0, 1)
+      addBit carry (1, 0) = if carry == 1 then (1, 0) else (0, 1)
+      addBit carry (1, 1) = if carry == 1 then (1, 1) else (1, 0)
+      (_, result) = mapAccumL addBit 0 $ zip bits1 bits2
+   in result
 
 {-
     *** TODO ***
@@ -157,7 +163,8 @@ add bits1 bits2 = undefined
     [[0,1,1,0,0,0],[0,0,0,0,0,0],[0,0,0,1,1,0]]
 -}
 stack :: BinaryNumber -> BinaryNumber -> [BinaryNumber]
-stack bits1 bits2 = undefined
+stack bits1 bits2 =
+  [if bit == 1 then bits else repeat 0 | (bit, bits) <- zip bits2 (iterate (0 :) bits1)]
 
 {-
     *** TODO ***
@@ -178,7 +185,7 @@ stack bits1 bits2 = undefined
     [0,6,6,30,30]
 -}
 multiply :: BinaryNumber -> BinaryNumber -> [BinaryNumber]
-multiply bits1 bits2 = undefined
+multiply bits1 bits2 = scanl add (repeat 0) $ stack bits1 bits2
 
 {-
     *** TODO ***
