@@ -167,9 +167,7 @@ testCond descr = testCondW descr 1
 {-|
     Describes a test case which evaluates the equality of two
      values (expected and given).
-
     It must be that the values are of types instantiating Show and Eq.
-
     This version gives a weight to the test. In an exercise with multiple test cases,
     this weight decides the score of the test, depending on the weights of the other
     tests and on the score of the whole exercise.
@@ -444,4 +442,3 @@ vmCheckIO :: [IO TestData]   -- ^ The test data, as a list of 'TestCase' lists i
 vmCheckIO tests = do
     td <- sequence tests
     runTests True True undefined td
-
