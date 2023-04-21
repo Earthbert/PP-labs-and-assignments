@@ -34,14 +34,14 @@
 ; TODO 1
 ; Implementați funcția match care primește o persoană person care
 ; intră în cameră, lista engagements a cuplurilor din cameră
-; (cuplurile având pe prima poziție persoanele de gen opus lui 
-; person), o listă pref1 care conține preferințele celor de același 
-; gen cu person, o listă pref2 cu preferințele celor de gen diferit, 
+; (cuplurile având pe prima poziție persoanele de gen opus lui
+; person), o listă pref1 care conține preferințele celor de același
+; gen cu person, o listă pref2 cu preferințele celor de gen diferit,
 ; respectiv o coadă queue a persoanelor din afara camerei,
 ; și întoarce lista de cupluri actualizată astfel încât noile
 ; cupluri să fie stabile între ele.
 ; Această listă se obține ca rezultat al încercării de a cupla pe
-; person cu cineva din cameră (person va încerca în ordine persoanele 
+; person cu cineva din cameră (person va încerca în ordine persoanele
 ; din lista sa de preferințe), care poate duce la destrămarea
 ; unui cuplu și necesitatea de a cupla noua persoană rămasă singură
 ; cu altcineva din cameră, etc. Procesul continuă până când:
@@ -54,20 +54,20 @@
 ;   cameră este logodit, cât și despre cine este singur
 (define (match person engagements pref1 pref2 queue)
   (let ext-loop ((curr-person person) (eng engagements))
-                (let inner-loop ((prefs (get-pref-list pref1 curr-person)))
-                                (if (null? prefs)
-                                    (cons (cons false curr-person) eng)
-                                    (let* ((liked-person (car prefs))
-                                          (liked-person-partner (get-partner eng liked-person)))
-                                          (if (and  (preferable? (get-pref-list pref2 liked-person) curr-person liked-person-partner)
-                                                    (not (false? liked-person-partner)))
-                                              (ext-loop liked-person-partner (update-engagements eng liked-person curr-person))
-                                              (inner-loop (cdr prefs))))))))
+    (let inner-loop ((prefs (get-pref-list pref1 curr-person)))
+      (if (null? prefs)
+          (cons (cons false curr-person) eng)
+          (let* ((liked-person (car prefs))
+                 (liked-person-partner (get-partner eng liked-person)))
+            (if (and  (preferable? (get-pref-list pref2 liked-person) curr-person liked-person-partner)
+                      (not (false? liked-person-partner)))
+                (ext-loop liked-person-partner (update-engagements eng liked-person curr-person))
+                (inner-loop (cdr prefs))))))))
 
 
 ; TODO 2
 ; Implementați funcția path-to-stability care primește lista
-; engagements a cuplurilor din cameră, o listă de preferințe 
+; engagements a cuplurilor din cameră, o listă de preferințe
 ; masculine mpref, o listă de preferințe feminine wpref, respectiv
 ; coada queue a persoanelor din afara camerei, și întoarce lista
 ; completă de logodne stabile, obținută după ce fiecare persoană
@@ -80,50 +80,51 @@
 ;   (#f . nume-bărbat) sau (nume-femeie . #f)
 (define (better-match-for person pref1 pref2 engagements queue)
   (let loop ((pref (get-pref-list pref1 person)))
-            (if (null? pref)
-                false
-                (let* ((liked-person (car pref)) (liked-person-partner (get-partner engagements liked-person)))
-                      (if (and  (not (member liked-person queue))
-                                (preferable? (get-pref-list pref2 liked-person)
-                                        person
-                                        liked-person-partner))
-                          (cons liked-person liked-person-partner)
-                          (loop (cdr pref)))))))
+    (if (null? pref)
+        false
+        (let* ((liked-person (car pref)) (liked-person-partner (get-partner engagements liked-person)))
+          (if (and  (not (member liked-person queue))
+                    (preferable? (get-pref-list pref2 liked-person)
+                                 person
+                                 liked-person-partner))
+              (cons liked-person liked-person-partner)
+              (loop (cdr pref)))))))
 
 (define (rev-eng eng)
   (map (lambda (pair) (cons (cdr pair) (car pair))) eng))
 
 (define (path-to-stability engagements mpref wpref queue)
-  (let* ((women (get-women wpref)) (is-women (lambda (person) (and (member person women) true))))
-        (let queue-loop ((eng engagements) (q queue))
-                        (if (null? q)
-                            eng
-                            (let  ((curr-person (car q)))
-                                  (if (is-women curr-person)
-                                      (let  ((replaced-eng (better-match-for curr-person wpref mpref (rev-eng eng) q)))
-                                            (if (false? replaced-eng)
-                                                (queue-loop (cons (cons curr-person false) eng) (cdr q))
-                                                (if (false? (cdr replaced-eng))
-                                                    (queue-loop (rev-eng (update-engagements (rev-eng eng) (car replaced-eng) curr-person))
-                                                                (cdr q))
-                                                    (queue-loop (rev-eng (update-engagements (rev-eng eng) (car replaced-eng) curr-person))
-                                                                (cons (cdr replaced-eng) (cdr q))))))
-                                      (let  ((replaced-eng (better-match-for curr-person mpref wpref eng q)))
-                                            (if (false? replaced-eng)
-                                                (queue-loop (cons (cons false curr-person) eng) (cdr q))
-                                                (if (false? (cdr replaced-eng))
-                                                    (queue-loop (update-engagements eng (car replaced-eng) curr-person)
-                                                                (cdr q))
-                                                    (queue-loop (update-engagements eng (car replaced-eng) curr-person)
-                                                                (cons (cdr replaced-eng) (cdr q))))))))))))
+  (let* ((women (get-women wpref))
+         (is-women (lambda (person) (and (member person women) true))))
+    (let queue-loop ((eng engagements) (q queue))
+      (if (null? q)
+          eng
+          (let  ((curr-person (car q)))
+            (if (is-women curr-person)
+                (let  ((replaced-eng (better-match-for curr-person wpref mpref (rev-eng eng) q)))
+                  (if (false? replaced-eng)
+                      (queue-loop (cons (cons curr-person false) eng) (cdr q))
+                      (if (false? (cdr replaced-eng))
+                          (queue-loop (rev-eng (update-engagements (rev-eng eng) (car replaced-eng) curr-person))
+                                      (cdr q))
+                          (queue-loop (rev-eng (update-engagements (rev-eng eng) (car replaced-eng) curr-person))
+                                      (cons (cdr replaced-eng) (cdr q))))))
+                (let  ((replaced-eng (better-match-for curr-person mpref wpref eng q)))
+                  (if (false? replaced-eng)
+                      (queue-loop (cons (cons false curr-person) eng) (cdr q))
+                      (if (false? (cdr replaced-eng))
+                          (queue-loop (update-engagements eng (car replaced-eng) curr-person)
+                                      (cdr q))
+                          (queue-loop (update-engagements eng (car replaced-eng) curr-person)
+                                      (cons (cdr replaced-eng) (cdr q))))))))))))
 
 
 ; TODO 3
-; Implementați funcția update-stable-match care primește o listă 
-; completă de logodne engagements (soluția anterioară), o listă de 
-; preferințe masculine mpref și o listă de preferințe feminine wpref 
-; (adică preferințele modificate față de cele pe baza cărora s-a 
-; obținut soluția engagements), și calculează o nouă listă de logodne 
+; Implementați funcția update-stable-match care primește o listă
+; completă de logodne engagements (soluția anterioară), o listă de
+; preferințe masculine mpref și o listă de preferințe feminine wpref
+; (adică preferințele modificate față de cele pe baza cărora s-a
+; obținut soluția engagements), și calculează o nouă listă de logodne
 ; stabile - conform cu noile preferințe, astfel:
 ; - unstable = cuplurile instabile din engagements
 ; - room-engagements = engagements - unstable
@@ -134,13 +135,13 @@
 ;   o femeie
 (define (update-stable-match engagements mpref wpref)
   (let* ((unstable-matches (get-unstable-couples engagements mpref wpref))
-        (stable-matches (filter (lambda (x) (not (member x unstable-matches))) engagements)))
-        (path-to-stability stable-matches mpref wpref (get-couple-members unstable-matches))))
+         (stable-matches (filter (lambda (x) (not (member x unstable-matches))) engagements)))
+    (path-to-stability stable-matches mpref wpref (get-couple-members unstable-matches))))
 
 
 ; TODO 4
 ; Implementați funcția build-stable-matches-stream care primește
-; un flux pref-stream de instanțe SMP și întoarce fluxul de 
+; un flux pref-stream de instanțe SMP și întoarce fluxul de
 ; soluții SMP corespunzător acestor instanțe.
 ; O instanță SMP este o pereche cu punct între o listă de preferințe
 ; masculine și o listă de preferințe feminine.
@@ -156,16 +157,16 @@
   (if (stream-empty? pref-stream)
       (stream-cons eng empty-stream)
       (stream-cons eng (stable-match-stream (update-stable-match eng  (car (stream-first pref-stream))
-                                                                      (cdr (stream-first pref-stream)))
+                                                                 (cdr (stream-first pref-stream)))
                                             (stream-rest pref-stream)))))
 
 (define (build-stable-matches-stream pref-stream)
-(if (stream-empty? pref-stream)
-    empty-stream
-    (let  ((first-elem (gale-shapley (car (stream-first pref-stream))
-                                    (cdr (stream-first pref-stream)))))
-          (stable-match-stream  first-elem
-                                (stream-rest pref-stream)))))
+  (if (stream-empty? pref-stream)
+      empty-stream
+      (let  ((first-elem (gale-shapley (car (stream-first pref-stream))
+                                       (cdr (stream-first pref-stream)))))
+        (stable-match-stream  first-elem
+                              (stream-rest pref-stream)))))
 
 
 

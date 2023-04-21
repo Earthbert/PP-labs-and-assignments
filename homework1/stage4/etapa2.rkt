@@ -90,13 +90,13 @@
 
 (define (get-partner engagements person)
   (get-tail (find-first (lambda (pair)
-                                (equal? person (car pair)))
+                          (equal? person (car pair)))
                         engagements)))
-  
+
 
 ; TODO 7
 ; Implementați recursiv funcționala change-first care primește
-; un predicat p, o listă L și o valoare val, și întoarce o nouă 
+; un predicat p, o listă L și o valoare val, și întoarce o nouă
 ; listă în care primul element din L care satisface predicatul p
 ; a fost înlocuit cu valoarea val, celelalte rămânând la fel.
 ; Dacă niciun element din L nu satisface predicatul, lista L
@@ -131,7 +131,7 @@
 ; Copiați implementarea funcției better-match-exists? din etapa 1.
 ; Funcția nu este repunctată de checker, dar este necesară pentru
 ; implementarea funcției stable-match? de mai jos.
-; Dacă nu ați implementat better-match-exists? în etapa 1, solicitați 
+; Dacă nu ați implementat better-match-exists? în etapa 1, solicitați
 ; o rezolvare de la asistent, astfel încât să puteți continua.
 (define (better-match-exists? p1 p2 p1-list pref2 engagements)
   (if (equal? (car p1-list) p2)
@@ -143,9 +143,9 @@
 
 
 ; TODO 9
-; Implementați funcția stable-match? care primește o listă 
-; completă de logodne engagements, o listă de preferințe masculine 
-; mpref și o listă de preferințe feminine wpref, și întoarce true 
+; Implementați funcția stable-match? care primește o listă
+; completă de logodne engagements, o listă de preferințe masculine
+; mpref și o listă de preferințe feminine wpref, și întoarce true
 ; dacă toate cuplurile din engagements sunt stabile.
 ; Un cuplu este stabil dacă pentru niciunul din membrii cuplului
 ; nu există un alt partener mai potrivit (conform definiției de
