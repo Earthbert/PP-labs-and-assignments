@@ -17,7 +17,7 @@ import TestPP
 -}
 
 findStringsLongerThanTenChars :: [String] -> [String]
-findStringsLongerThanTenChars = filter (\s -> length s > 10)
+findStringsLongerThanTenChars = filter ((<) 10 . length)
 
 findStringsLongerThanTenChars2 :: [String] -> [String]
 findStringsLongerThanTenChars2 l = [s | s <- l, length s > 10]
@@ -127,7 +127,7 @@ check4 =
  -}
 
 infiniteApply :: (Double -> Double) -> Double -> [Double]
-infiniteApply = iterate
+infiniteApply f x0 = x0 : infiniteApply f (f x0)
 
 -- Verificare: check5
 check5 :: TestData
