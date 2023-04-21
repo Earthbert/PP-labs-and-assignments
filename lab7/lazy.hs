@@ -63,10 +63,10 @@ check2 =
 -}
 
 setIntersection :: Eq a => [a] -> [a] -> [a]
-setIntersection a b = [x | x <- a, elem x a && elem x b]
+setIntersection a b = [x | x <- a, x `elem` a && x `elem` b]
 
 setDiff :: Eq a => [a] -> [a] -> [a]
-setDiff a b = [x | x <- a, elem x a && notElem x b]
+setDiff a b = [x | x <- a, x `elem` a && x `notElem` b]
 
 cartProduct :: [a] -> [b] -> [(a, b)]
 cartProduct a b = [(x, y) | x <- a, y <- b]
@@ -227,11 +227,11 @@ check7 =
  -}
 
 -- newtonRaphsonSolve :: Double -> Double -> (Double -> Double) -> (Double -> Double) -> Double
-newtonRaphsonSolve x_old atol g dg = let 
+newtonRaphsonSolve x_old atol g dg =
+  fst $ head $ dropWhile (\(a, b) -> abs (a - b) > atol) vals
+  where
     nr_sol = newtonRaphson x_old g dg
     vals = zip nr_sol $ tail nr_sol
-    in fst $ head $ dropWhile (\(a, b) -> abs (a - b) > atol) vals
-
 
 -- Verificare: check8
 check8 :: TestData
@@ -260,10 +260,10 @@ check8 =
  -}
 
 babylonianMethod :: Double -> Double -> Double -> Double
-babylonianMethod a x_old atol = let 
+babylonianMethod a x_old atol = fst $ head $ dropWhile (\(a, b) -> abs (a - b) > atol) vals
+  where
     nr_sol = infiniteApply (\x -> 0.5 * (x + a / x)) x_old
     vals = zip nr_sol $ tail nr_sol
-    in fst $ head $ dropWhile (\(a, b) -> abs (a - b) > atol) vals 
 
 -- Verificare: check9
 check9 :: TestData
