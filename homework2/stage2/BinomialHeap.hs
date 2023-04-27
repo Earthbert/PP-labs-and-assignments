@@ -1,3 +1,6 @@
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+
+{-# HLINT ignore "Redundant bracket" #-}
 module BinomialHeap where
 
 import Data.Function (on)
@@ -56,6 +59,9 @@ data BinomialHeap p k = BinomialHeap {size :: Int, trees :: [BinomialTree p k]}
     Node {prio = 0, key = 'a', children = [Node {prio = 1, key = 'b', children = []}]}
 -}
 attach :: Ord p => BinomialTree p k -> BinomialTree p k -> BinomialTree p k
+attach EmptyTree EmptyTree = EmptyTree
+attach EmptyTree node = node
+attach node EmptyTree = node
 attach tree1@(Node p1 k1 c1) tree2@(Node p2 k2 c2)
   | p1 < p2 = tree1 {children = tree2 : c1}
   | otherwise = tree2 {children = tree1 : c2}
@@ -109,10 +115,7 @@ insertTree :: Ord p => BinomialTree p k -> [BinomialTree p k] -> [BinomialTree p
 insertTree tree@(Node p1 k1 c1) trees = case trees of
   [] -> [tree]
   EmptyTree : rest -> tree : rest
-  node@(Node p2 k2 c2) : rest ->
-    if length c2 == length c1
-      then EmptyTree : insertTree (attach node tree) rest
-      else node : insertTree tree rest
+  node@(Node p2 k2 c2) : rest -> EmptyTree : insertTree (attach node tree) rest
 
 {-
     *** TODO ***
@@ -156,7 +159,7 @@ emptyHeap = BinomialHeap 0 []
 
 insert :: Ord p => p -> k -> BinomialHeap p k -> BinomialHeap p k
 insert prio key heap@(BinomialHeap s trees) =
-    BinomialHeap (s + 1) $ insertTree (Node prio key []) trees
+  BinomialHeap (s + 1) $ insertTree (Node prio key []) trees
 
 {-
     *** TODO ***
@@ -184,7 +187,8 @@ insert prio key heap@(BinomialHeap s trees) =
 -}
 findMin :: Ord p => BinomialHeap p k -> Maybe (p, k)
 findMin heap@(BinomialHeap 0 []) = Nothing
-findMin heap = Just $ foldl comparePrio (head pairs) pairs where
+findMin heap = Just $ foldl comparePrio (head pairs) pairs
+  where
     pairs = [(p, k) | (Node p k c) <- trees heap]
     comparePrio acc pair = if fst acc < fst pair then acc else pair
 
@@ -237,7 +241,17 @@ zipExtend a' b' (a : as) (b : bs) = (a, b) : zipExtend a' b' as bs
     ]
 -}
 mergeTrees :: Ord p => [BinomialTree p k] -> [BinomialTree p k] -> [BinomialTree p k]
-mergeTrees trees1 trees2 = undefined
+mergeTrees trees1 trees2 = case lastCarry of
+  EmptyTree -> result
+  _ -> result ++ [lastCarry]
+  where
+    addTrees carry (EmptyTree, EmptyTree) = (EmptyTree, carry)
+    addTrees carry (node1@(Node p1 k1 c1), node2@(Node p2 k2 c2)) = (attach node2 node1, carry)
+    addTrees EmptyTree (node, EmptyTree) = (EmptyTree, node)
+    addTrees EmptyTree (EmptyTree, node) = (EmptyTree, node)
+    addTrees carry (EmptyTree, node) = (attach node carry, EmptyTree)
+    addTrees carry (node, EmptyTree) = (attach node carry, EmptyTree)
+    (lastCarry, result) = mapAccumL addTrees EmptyTree $ zipExtend EmptyTree EmptyTree trees1 trees2
 
 {-
     *** TODO ***
@@ -249,4 +263,8 @@ mergeTrees trees1 trees2 = undefined
     Exemple: similare cu cele de la mergeTrees.
 -}
 merge :: Ord p => BinomialHeap p k -> BinomialHeap p k -> BinomialHeap p k
-merge heap1 heap2 = undefined
+merge heap1@(BinomialHeap size1 trees1) heap2@(BinomialHeap size2 trees2) =
+  BinomialHeap newSize mergedTrees
+  where
+    newSize = size1 + size2
+    mergedTrees = mergeTrees trees1 trees2
