@@ -1,9 +1,9 @@
 module BinomialHeap where
 
+import Data.Char (toUpper)
+import Data.Foldable
 import Data.Function (on)
 import Data.List hiding (insert)
-import Data.Foldable
-import Data.Char (toUpper)
 
 {-
     Reprezentarea unui arbore binomial, având priorități de tipul p și chei
@@ -291,13 +291,15 @@ merge heap1@(BinomialHeap size1 trees1) heap2@(BinomialHeap size2 trees2) =
     [(1,[0,2,3]),(2,[1,0,3]),(3,[1,2])]  -- fără 0 în ultima listă
 -}
 isolate :: a -> [a] -> [(a, [a])]
-isolate placeHolder list = snd $ mapAccumL f ([], tail list) list where
-  f (firstPart, secondPart) elem = ((newFirstPart, newSecondPart), (elem, newList)) where
-    newFirstPart = firstPart ++ [elem]
-    newSecondPart = tail secondPart
-    newList = case secondPart of
-      [] -> firstPart
-      _ -> firstPart ++ [placeHolder] ++ secondPart
+isolate placeHolder list = snd $ mapAccumL f ([], tail list) list
+  where
+    f (firstPart, secondPart) elem = ((newFirstPart, newSecondPart), (elem, newList))
+      where
+        newFirstPart = firstPart ++ [elem]
+        newSecondPart = tail secondPart
+        newList = case secondPart of
+          [] -> firstPart
+          _ -> firstPart ++ [placeHolder] ++ secondPart
 
 {-
     *** TODO ***
@@ -341,7 +343,16 @@ isolate placeHolder list = snd $ mapAccumL f ([], tail list) list where
     evaluării leneșe la utilizarea eficientă a funcției isolate?
 -}
 removeMin :: (Ord p, Eq k) => BinomialHeap p k -> BinomialHeap p k
-removeMin heap = undefined
+removeMin heap@(BinomialHeap 0 []) = heap
+removeMin (BinomialHeap s child) = BinomialHeap (s - 1) newChildren
+  where
+    isolatedTrees = isolate EmptyTree child
+    compareTree (EmptyTree, restTrees1) (tree, restTrees2) = (tree, restTrees2)
+    compareTree (min, restTrees1) (EmptyTree, restTrees2) = (min, restTrees1)
+    compareTree (min@(Node v1 _ _), restTrees1) (tree@(Node v2 _ _), restTrees2) =
+      if v1 > v2 then (tree, restTrees2) else (min, restTrees1)
+    (isolatedTree, remainingTrees) = foldl compareTree (head isolatedTrees) isolatedTrees
+    newChildren = mergeTrees remainingTrees $ reverse $ children isolatedTree
 
 {-
     *** TODO ***
@@ -354,10 +365,10 @@ removeMin heap = undefined
           <copil 1>
           ...
           <copil n>
-      
+
       unde reprezentarea copiilor este indentată cu 2 spații față de cea
       a părintelui.
-    
+
     Hint: replicate și intercalate.
 
     Exemple:
@@ -379,7 +390,7 @@ removeMin heap = undefined
       2 ('b')
 -}
 instance (Show p, Show k) => Show (BinomialTree p k) where
-    show tree = undefined
+  show tree = undefined
 
 {-
     *** TODO ***
@@ -389,14 +400,14 @@ instance (Show p, Show k) => Show (BinomialTree p k) where
     <arbore 1>
     ...
     <arbore n>
-    
+
     Exemple:
 
-    > insert 3 'c' $ insert 2 'b' $ insert 1 'a' emptyHeap                                        
+    > insert 3 'c' $ insert 2 'b' $ insert 1 'a' emptyHeap
     3 ('c')
     1 ('a')
       2 ('b')
-    
+
     > insert 5 'e' $ insert 4 'd' $ insert 3 'c' $ insert 2 'b' $ insert 1 'a' emptyHeap
     5 ('e')
     *
@@ -406,7 +417,7 @@ instance (Show p, Show k) => Show (BinomialTree p k) where
       2 ('b')
 -}
 instance (Show p, Show k) => Show (BinomialHeap p k) where
-    show heap = undefined
+  show heap = undefined
 
 {-
     *** TODO ***
@@ -428,8 +439,8 @@ instance (Show p, Show k) => Show (BinomialHeap p k) where
       2 ('B')
 -}
 instance Functor (BinomialTree p) where
-    -- fmap :: (k1 -> k2) -> BinomialTree p k1 -> BinomialTree p k2
-    fmap f tree = undefined
+  -- fmap :: (k1 -> k2) -> BinomialTree p k1 -> BinomialTree p k2
+  fmap f tree = undefined
 
 {-
     *** TODO ***
@@ -451,8 +462,8 @@ instance Functor (BinomialTree p) where
       2 ('B')
 -}
 instance Functor (BinomialHeap p) where
-    -- fmap :: (k1 -> k2) -> BinomialHeap p k1 -> BinomialHeap p k2
-    fmap f heap = undefined
+  -- fmap :: (k1 -> k2) -> BinomialHeap p k1 -> BinomialHeap p k2
+  fmap f heap = undefined
 
 {-
     *** TODO BONUS ***
@@ -501,5 +512,5 @@ instance Functor (BinomialHeap p) where
     "acdb"
 -}
 instance Foldable (BinomialTree p) where
-    -- foldr :: (k -> b -> b) -> b -> BinomialTree p k -> b
-    foldr f acc tree = undefined
+  -- foldr :: (k -> b -> b) -> b -> BinomialTree p k -> b
+  foldr f acc tree = undefined
