@@ -390,7 +390,15 @@ removeMin (BinomialHeap s child) = BinomialHeap (s - 1) newChildren
       2 ('b')
 -}
 instance (Show p, Show k) => Show (BinomialTree p k) where
-  show tree = undefined
+  show = showNode 0
+    where
+      indent n = replicate (2 * n) ' '
+      printNode (Node p k _) = show p ++ " (" ++ show k ++ ")"
+      showNode depth EmptyTree = indent depth ++ "*"
+      showNode depth node@(Node _ _ []) =
+        indent depth ++ printNode node
+      showNode depth node@(Node _ _ child) =
+        indent depth ++ printNode node ++ "\n" ++ intercalate "\n" (map ((depth + 1) `showNode`) child)
 
 {-
     *** TODO ***
@@ -417,7 +425,7 @@ instance (Show p, Show k) => Show (BinomialTree p k) where
       2 ('b')
 -}
 instance (Show p, Show k) => Show (BinomialHeap p k) where
-  show heap = undefined
+  show (BinomialHeap _ child) = intercalate "\n" $ map show child
 
 {-
     *** TODO ***
@@ -440,7 +448,8 @@ instance (Show p, Show k) => Show (BinomialHeap p k) where
 -}
 instance Functor (BinomialTree p) where
   -- fmap :: (k1 -> k2) -> BinomialTree p k1 -> BinomialTree p k2
-  fmap f tree = undefined
+  fmap f EmptyTree = EmptyTree
+  fmap f (Node p k c) = Node p (f k) $ map (fmap f) c
 
 {-
     *** TODO ***
@@ -463,7 +472,7 @@ instance Functor (BinomialTree p) where
 -}
 instance Functor (BinomialHeap p) where
   -- fmap :: (k1 -> k2) -> BinomialHeap p k1 -> BinomialHeap p k2
-  fmap f heap = undefined
+  fmap f (BinomialHeap s child) = BinomialHeap s $ map (fmap f) child
 
 {-
     *** TODO BONUS ***
