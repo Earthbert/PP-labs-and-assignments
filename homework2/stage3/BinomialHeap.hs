@@ -522,4 +522,9 @@ instance Functor (BinomialHeap p) where
 -}
 instance Foldable (BinomialTree p) where
   -- foldr :: (k -> b -> b) -> b -> BinomialTree p k -> b
-  foldr f acc tree = undefined
+  foldr f acc tree = foldrFunc partial acc
+    where
+      partial = fmap f tree
+      foldrFunc EmptyTree = id
+      foldrFunc (Node _ k []) = k
+      foldrFunc (Node _ k c) = k . foldl (.) id (map foldrFunc c)
