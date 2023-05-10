@@ -115,8 +115,10 @@ hasTwoCitadels(tile_type(2, _, _)).
 % reprezentarea inițială.
 ccw(tile_type(Cit, Cross, Dir), Rot, tile_type(Cit, Cross, RotDir)) :- rotate(Dir, Rot, RotDir).
 
-rotate(R, 0, R).
-rotate(dir(N, E, S, W), Rot, R) :- Nrot is Rot-1, rotate(dir(W, N, E, S), Nrot, R).
+rotate(dir(N, E, S, W), 0, dir(N, E, S, W)).
+rotate(dir(N, E, S, W), 1, dir(E, S, W, N)).
+rotate(dir(N, E, S, W), 2, dir(S, W, N, E)).
+rotate(dir(N, E, S, W), 3, dir(W, N, E, S)).
 
 
 % rotations/2
@@ -136,8 +138,22 @@ rotate(dir(N, E, S, W), Rot, R) :- Nrot is Rot-1, rotate(dir(W, N, E, S), Nrot, 
 % piesa 16 rezultatul va conține o singură pereche.
 %
 % Folosiți recursivitate (nu meta-predicate).
-rotations(_, _) :- false.
 
+rotations(Tile, RotationPairs) :- genRotations(Tile, 3, RotationPairs).
+
+genRotations(Tile, 0, [(0, Tile)]).
+
+genRotations(Tile, N, L) :-
+	ccw(Tile, N, RotatedTile),
+	NextN is N - 1,
+	genRotations(Tile, NextN, L),
+	member((_, RotatedTile), L).
+
+genRotations(Tile, N, [(N, RotatedTile)|L]) :-
+	ccw(Tile, N, RotatedTile),
+	NextN is N - 1,
+	genRotations(Tile, NextN, L),
+	\+ member((_, RotatedTile), L).
 
 % match/3
 % match(+Tile, +NeighborTile, +NeighborDirection)
@@ -153,7 +169,11 @@ rotations(_, _) :- false.
 % ccw(T8, 3, T8R), match(T8R, T10, w).
 %
 % Puteți folosi predicatul opposite/2 din utils.pl.
-match(_, _, _) :- false.
+match(Tile, NeighTile, NeightDir) :-
+	at(Tile, NeightDir, Type),
+	OppositeDir is opposite(NeightDir), 
+	at(NeighTile, OppositeDir, TypeNeigh),
+	Type == TypeNeigh.
 
 
 % findRotation/3
