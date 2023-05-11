@@ -171,7 +171,7 @@ genRotations(Tile, N, [(N, RotatedTile)|L]) :-
 % Puteți folosi predicatul opposite/2 din utils.pl.
 match(Tile, NeighTile, NeightDir) :-
 	at(Tile, NeightDir, Type),
-	OppositeDir is opposite(NeightDir), 
+	opposite(NeightDir, OppositeDir), 
 	at(NeighTile, OppositeDir, TypeNeigh),
 	Type == TypeNeigh.
 
@@ -199,7 +199,15 @@ match(Tile, NeighTile, NeightDir) :-
 % soluția de mai sus s-ar reduce doar la rotația 3.
 %
 % Hint: Prolog face backtracking automat. Folosiți match/3.
-findRotation(_, _, _) :- false.
+findRotation(Tile, Neigh, Rot) :-
+	rotations(Tile, RotatedPairs),
+	member((Rot, RotatedTile), RotatedPairs),
+	matchAll(RotatedTile, Neigh).
+
+matchAll(_, []).
+matchAll(Tile, [(NeighTile, NeighDir) | Rest]) :- 
+	match(Tile, NeighTile, NeighDir),
+	matchAll(Tile, Rest).
 
 
 
