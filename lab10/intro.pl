@@ -17,8 +17,8 @@ exercitiul(1, []).
 %% restul lui List este egal cu concatenarea restului lui List1 cu
 %% List2.
 
-myConcat([],L,L).
-myConcat([X1|L1],L2,[X|L]):- X1 = X, myConcat(L1,L2,L).
+myConcat([], L, L).
+myConcat([X1 | L1], L2, [X | L]) :- X1 = X, myConcat(L1, L2, L).
 
 check1:-
     tests([
@@ -45,8 +45,8 @@ exercitiul(2, []).
 %% primul element din L, iar prima parte a lui RevList (de la primul
 %% element pâna la penultimul) este inversul restului elementelor din L.
 
-myReverse([],[]).
-myReverse([X1|L1],L2):- X1 = X2, myReverse(L1,Y), myConcat(Y,[X2],L2).
+myReverse([], []).
+myReverse([X1 | L1], L2):- X1 = X2, myReverse(L1, Y), myConcat(Y, [X2], L2).
 
 check2:-
     tests([
@@ -78,8 +78,8 @@ exercitiul(3, []).
 %% (rezultatul se întoarce neschimbat de la sfârșitul recursivității
 %% până la apelul inițial).
 
-myReverseAcc([],R,R).
-myReverseAcc([Xl|L],ACC,R):- myReverseAcc(L,[Xl|ACC],R).
+myReverseAcc([], R, R).
+myReverseAcc([Xl | L], ACC, R):- myReverseAcc(L, [Xl | ACC], R).
 
 check3:-
     tests([
@@ -100,7 +100,7 @@ exercitiul(4, []).
 %% Hint: Predicatul este adevărat dacă F este egal cu N*(N-1)!.
 
 factorial(1, 1).
-factorial(N,F):- X is N-1, factorial(X,S), F is S*N.
+factorial(N, F):- X is N - 1, factorial(X, S), F is S * N.
 
 check4:-
 	tests([
@@ -119,7 +119,7 @@ exercitiul(5, []).
 
 %% Hint: Predicatul este adevărat dacă inversul lui List este List.
 
-palindrom(L):- myReverse(L, R), L=R.
+palindrom(L):- myReverse(L, R), L = R.
 
 check5 :-
 	tests([
@@ -209,8 +209,8 @@ exercitiul(8, []).
 %% dacă există arc de la unul dintre urmașii lui Y la X.
 
 
-descendantOf(A,B):- arc(B,A).
-descendantOf(A,B):- arc(B,C), descendantOf(A,C).
+descendantOf(A, B):- arc(B, A).
+descendantOf(A, B):- arc(B, C), descendantOf(A, C).
 
 check8:-
 	tests([
@@ -276,8 +276,8 @@ exercitiul(10, []).
 
 drum(N1, N1, [N1]).
 drum(N1, N2, [N1, N2]):- arc(N1, N2).
-drum(N1, N2, [N1|T]):- arc(N1,X), descendantOf(N2,X), drum(X,N2,T).
-drum(N1, N2, [N1|T]):- arc(X,N1), drum(X,N2,T).
+drum(N1, N2, [N1 | T]):- arc(N1, X), descendantOf(N2, X), drum(X, N2, T).
+drum(N1, N2, [N1 | T]):- arc(X, N1), drum(X, N2, T).
 
 check10:-
 	tests([

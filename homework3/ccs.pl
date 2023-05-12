@@ -149,7 +149,7 @@ genRotations(Tile, N, L) :-
 	genRotations(Tile, NextN, L),
 	member((_, RotatedTile), L).
 
-genRotations(Tile, N, [(N, RotatedTile)|L]) :-
+genRotations(Tile, N, [(N, RotatedTile) | L]) :-
 	ccw(Tile, N, RotatedTile),
 	NextN is N - 1,
 	genRotations(Tile, NextN, L),
