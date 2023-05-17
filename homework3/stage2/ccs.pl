@@ -2,7 +2,6 @@
 :- ensure_loaded('files.pl').
 
 
-
 % tile/2
 % tile(Index, Tile)
 %
@@ -219,7 +218,7 @@ matchAll(Tile, [(NeighTile, NeighDir) | Rest]) :-
 %
 % Leagă Board la reprezentarea unei table goale de joc (nu a fost
 % plasată încă nicio piesă).
-emptyBoard(_) :- false.
+emptyBoard([]).
 
 
 % boardSet/4
@@ -234,7 +233,39 @@ emptyBoard(_) :- false.
 % devine singura de pe tablă.
 %
 % Poziția este dată ca un tuplu (X, Y).
-boardSet(_, _, _, _) :- false.
+
+nextDir(n, e).
+nextDir(e, s).
+nextDir(s, w).
+
+getNeighs(Board, Coord, Dir, [(Tile, Dir) | Neighs]) :-
+	nextDir(Dir, NextDir),
+	getNeighs(Board, Coord, NextDir, Neighs),
+	neighbor(Coord, Dir, CoordN),
+	member((CoordN, Tile), Board).
+
+getNeighs(Board, Coord, Dir, Neighs) :-
+	nextDir(Dir, NextDir),
+	getNeighs(Board, Coord, NextDir, Neighs),
+	neighbor(Coord, Dir, CoordN),
+	\+ member((CoordN, _), Board).
+
+getNeighs(Board, Coord, w, [(Tile, w)]) :-
+	neighbor(Coord, w, CoordN),
+	member((CoordN, Tile), Board).
+
+getNeighs(Board, Coord, w, []) :-
+	neighbor(Coord, w, CoordN),
+	\+ member((CoordN, _), Board).
+
+boardSet([], Pos, Tile, [(Pos, Tile)]).
+
+boardSet(BoardIn, Pos, Tile, [(Pos, Tile) | BoardIn]) :-
+	\+ member((Pos, _), BoardIn),
+	getNeighs(BoardIn, Pos, n, Neighs),
+	length(Neighs, N),
+	N > 0,
+	findRotation(Tile, Neighs, 0).
 
 
 % boardGet/3
@@ -244,7 +275,7 @@ boardSet(_, _, _, _) :- false.
 % poziția Pos. Poziția este dată ca un tuplu (X, Y).
 %
 % Dacă la poziția Pos nu este nicio piesă, predicatul eșuează.
-boardGet(_, _, _) :- false.
+boardGet(Board, (X, Y), Tile) :- member(((X, Y), Tile), Board).
 
 
 % canPlaceTile/3
@@ -260,7 +291,7 @@ boardGet(_, _, _) :- false.
 % - piesa se potrivește cu toți vecinii deja existenți pe tablă.
 %
 % Hint: neighbor/3 și directions/1 , ambele din utils.pl
-canPlaceTile(_, _, _) :- false.
+canPlaceTile(Board, Pos, Tile) :- boardSet(Board, Pos, Tile, _).
 
 
 % boardGetLimits/5
@@ -272,6 +303,7 @@ canPlaceTile(_, _, _) :- false.
 % Pentru o tablă goală, predicatul eșuează.
 %
 % Hint: max_list/2 și min_list/2
+
 boardGetLimits(_, _, _, _, _) :- false.
 
 
