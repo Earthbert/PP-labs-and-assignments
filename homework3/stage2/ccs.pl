@@ -258,11 +258,13 @@ getNeighs(Board, Coord, w, []) :-
 	neighbor(Coord, w, CoordN),
 	\+ member((CoordN, _), Board).
 
-boardSet([], Pos, Tile, [(Pos, Tile)]).
+getNeighbours(Board, Coord, Neigh) :- getNeighs(Board, Coord, n, Neigh).
+
+boardSet(Board, Pos, Tile, [(Pos, Tile)]) :- emptyBoard(Board).
 
 boardSet(BoardIn, Pos, Tile, [(Pos, Tile) | BoardIn]) :-
 	\+ member((Pos, _), BoardIn),
-	getNeighs(BoardIn, Pos, n, Neighs),
+	getNeighbours(BoardIn, Pos, Neighs),
 	length(Neighs, N),
 	N > 0,
 	findRotation(Tile, Neighs, 0).
@@ -304,8 +306,13 @@ canPlaceTile(Board, Pos, Tile) :- boardSet(Board, Pos, Tile, _).
 %
 % Hint: max_list/2 și min_list/2
 
-boardGetLimits(_, _, _, _, _) :- false.
+boardGetLimits(Board, _, _, _, _) :- emptyBoard(Board), false.
 
+boardGetLimits(Board, Xmin, Ymin, Xmax, Ymax) :-
+	member(((Xmin, _), _), Board), forall(member(((X, _), _), Board), X >= Xmin),
+	member(((_, Ymin), _), Board), forall(member(((_, Y), _), Board), Y >= Ymin),
+	member(((Xmax, _), _), Board), forall(member(((X, _), _), Board), X =< Xmax),
+	member(((_, Ymax), _), Board), forall(member(((_, Y), _), Board), Y =< Ymax).
 
 % getAvailablePositions/2
 % getAvailablePositions(+Board, -Positions)
@@ -319,7 +326,28 @@ boardGetLimits(_, _, _, _, _) :- false.
 % Hint: between/3 (predefinit) și neighbor/3 din utils.pl
 %
 % Atenție! Și în afara limitelor curente există poziții disponibile.
-getAvailablePositions(_, _) :- false.
+
+validPos(Board, X, Y) :-
+	\+ member(((X, Y), _), Board),
+	getNeighbours(Board, (X, Y), Neighs),
+	length(Neighs, N),
+	N > 0.
+
+getPositions(Board, )
+
+getAvailablePositions(Board, _) :- emptyBoard(Board), false.
+
+getAvailablePositions(Board, Positions) :-
+	boardGetLimits(Board, Xmin, Ymin, Xmax, Ymax),
+	XLLimit is Xmin - 1,
+	XULimit is Xmax + 1,
+	YLLimit is Ymin - 1,
+	YULimit is Ymax + 1,
+	findall((X, Y), 
+			(between(XLLimit, XULimit, X),
+			between(YLLimit, YULimit, Y),
+			validPos(Board, X, Y)),
+			Positions).
 
 
 % findPositionForTile/4
@@ -341,6 +369,10 @@ getAvailablePositions(_, _) :- false.
 % se potrivește cu rotația 1 sau 2 - două soluții diferite. Pentru
 % plasarea la vest de piesa 11 a piesei 16 însă există o singură soluție
 % - rotație 0.
-findPositionForTile(_, _, _, _) :- false.
+findPositionForTile(Board, _, (0, 0), 0) :- emptyBoard(Board).
 
-
+findPositionForTile(Board, Tile, Pos, Rot) :-
+	getAvailablePositions(Board, Positions),
+	member(Pos, Positions),
+	getNeighbours(Board, Pos, Neigh),
+	findRotation(Tile, Neigh, Rot).
