@@ -1,7 +1,7 @@
 
 %% Decomentați linia de mai jos pentru testare mai detaliată.
 %% ATENȚIE: pe vmchecker linia este comentată.
-detailed_mode_disabled :- !, fail.
+%detailed_mode_disabled :- !, fail.
 
 
 % quick ref:
@@ -128,35 +128,179 @@ tt(findrot, [
           findRotation(TX, L, R))', 'R', [1,3])
    ]).
 
-%tt().
+% aceste teste folosesc boardSetAll/2 și boardSetTest/2 definite mai jos
+% și tablele definite folosind boardTiles/2, tot mai jos.
+tt(setget, [
+           % emptyBoard leagă ceva și boardSet produce un board diferit de empty
+        0.6, exp('emptyBoard(B)', [val('B')])
+       ,0.7, exp('emptyBoard(B0), tile(16, T), boardSet(B0, (1, 1), T, B)', [cond('B \\= B0')])
+       ,0.7, exp('emptyBoard(B0), tile(16, T), boardSet(B0, (-2, -2), T, B)', [cond('B \\= B0')])
+           % nu se admit suprapuneri pe aceeași poziție
+       ,0.5, uck((emptyBoard(B0), tile(16, T), tile(1, T1),
+                 boardSet(B0, (1, 1), T, B), boardSet(B, (1, 1), T1, _)))
+       ,0.5, uck((boardSetAll([(0, 0, 6, 1), (1, 0, 2, 0), (2, 0, 7, 1)], Bd),
+                 tile(10, T), boardSet(Bd, (1, 0), T, Bd)))
+       , -1, uck((emptyBoard(Ba0), tile(16, Ta), boardSet(Ba0, (1, 1), Ta, _)))
+           % boardSet merge pe un test mai mare
+           , exp('boardSetTest(2, B)', [val('B')])
 
+           , uck((emptyBoard(Bg), boardGet(Bg, (0, 0), _)))
+           , exp('emptyBoard(B0), tile(16, T), boardSet(B0, (1, 1), T, B), boardGet(B, (1, 1), TCk)',
+                 [cond('T == TCk')])
+           , exp('boardSetTest(2, B), tile(10, T), boardGet(B, (1, 1), TCk)', [cond('T == TCk')])
+           , exp('boardSetTest(2, B), tileRot(3, 2, T), boardGet(B, (4, 1), TCk)', [cond('T == TCk')])
+           , exp('boardSetTest(1, B), tile(11, T), boardGet(B, (-1, -1), TCk)', [cond('T == TCk')])
+       ,0.5, uck((boardSetTest(2, Bx), boardGet(Bx, (0, 1), _)))
+       ,0.5, uck((boardSetTest(1, Bx), boardGet(Bx, (2, 1), _)))
+       , -1, uck((boardSetTest(1, Bx), boardGet(Bx, (1, 1), _)))
+   ]).
 
+tt(limits, [
+       uck((emptyBoard(B), boardGetLimits(B, _, _, _, _)))
+ , -1, uck((boardSetTest(0, Bb), boardGetLimits(Bb, _, _, _, _)))
+     , exp('emptyBoard(B), tile(14, T), boardSet(B, (0, 0), T, B1),
+     boardSet(B1, (1, 0), T, B2), boardGetLimits(B2, Xm, Ym, XM, YM)',
+           ['Xm', 0, 'Ym', 0, 'XM', 1, 'YM', 0])
+     , exp('boardSetTest(0, B), boardGetLimits(B, Xm, Ym, XM, YM)',
+           ['Xm', 0, 'Ym', 0, 'XM', 2, 'YM', 2])
+     , exp('boardSetTest(1, B), boardGetLimits(B, Xm, Ym, XM, YM)',
+           ['Xm', -1, 'Ym', -1, 'XM', 2, 'YM', 1])
+     , exp('boardSetTest(2, B), boardGetLimits(B, Xm, Ym, XM, YM)',
+           ['Xm', 0, 'Ym', -1, 'XM', 4, 'YM', 2])
+   ]).
 
+tt(canPlaceA, [
+               nSO('B0^B^I^YI^(emptyBoard(B0), between(1, 16, I), tile(I, T), YI is I * 2,
+               canPlaceTile(B, (I, YI), T))', 'T', 16)
+          , 2, exp('emptyBoard(B0), tile(8, T8), boardSet(B0, (0, 0), T8, B), tile(2, T2), tileRot(2, 2, T2R2)',
+                   [cond('canPlaceTile(B, (1, 0), T2)'), cond('canPlaceTile(B, (0, -1), T2R2)'),
+                    cond('canPlaceTile(B, (0, 1), T2R2)')])
+          , 2, exp('emptyBoard(B0), tile(8, T8), boardSet(B0, (0, 0), T8, B), tile(2, T2), tileRot(2, 2, T2R2)',
+                   [cond('\\+ canPlaceTile(B, (-1, 0), T2R2)'), cond('\\+ canPlaceTile(B, (0, -1), T2)'),
+                    cond('\\+ canPlaceTile(B, (0, 0), T2)'), cond('\\+ canPlaceTile(B, (1, 1), T2R2)')])
+   ]).
+
+tt(canPlace1, [
+       exp('boardSetTest(1, B), tile(11, T11), tile(14, T14), tileRot(10, 2, T10R2)',
+           [ cond('canPlaceTile(B, (2, -1), T14)')
+           , cond('canPlaceTile(B, (-2, -1), T11)')
+           , cond('canPlaceTile(B, (1, 2), T10R2)')
+           , cond('canPlaceTile(B, (-2, 0), T10R2)')
+           , cond('canPlaceTile(B, (-1, 1), T14)')
+           ])
+     , exp('boardSetTest(1, B), tile(11, T11), tile(14, T14), tile(10, T10)',
+           [ cond('\\+ canPlaceTile(B, (0, -1), T11)')
+           , cond('\\+ canPlaceTile(B, (2, -1), T11)')
+           , cond('\\+ canPlaceTile(B, (0, 1), T10)')
+           , cond('\\+ canPlaceTile(B, (1, -2), T10)')
+           , cond('\\+ canPlaceTile(B, (-2, 1), T10)')
+           ])
+   ]).
+
+tt(canPlace2, [
+       exp('boardSetTest(2, B), tile(11, T11), tileRot(14, 1, T14R), tile(10, T10)',
+           [ cond('canPlaceTile(B, (2, 0), T10)')
+           , cond('canPlaceTile(B, (0,-2), T10)')
+           , cond('canPlaceTile(B, (0, 3), T10)')
+           , cond('canPlaceTile(B, (2, -1), T10)')
+           , cond('canPlaceTile(B, (2, 3), T10)')
+           , cond('canPlaceTile(B, (0,-2), T11)')
+           , cond('canPlaceTile(B, (0, 1), T14R)')
+           , cond('canPlaceTile(B, (5, 0), T11)')
+           ])
+     , exp('boardSetTest(2, B), tile(11, T11), tileRot(14, 1, T14R), tile(10, T10)',
+           [ cond('\\+ canPlaceTile(B, (0, 1), T10)')
+           , cond('\\+ canPlaceTile(B, (4,-1), T10)')
+           , cond('\\+ canPlaceTile(B, (3,-1), T14R)')
+           , cond('\\+ canPlaceTile(B, (2, 0), T11)')
+           , cond('\\+ canPlaceTile(B, (1,-2), T11)')
+           ])
+   ]).
+
+tt(avPos, [
+         4, uck((emptyBoard(B0), getAvailablePositions(B0, _)))
+       ,-1, uck((boardSetTest(0, B), getAvailablePositions(B, _)))
+        ,7, exp('boardSetTest(0, B), getAvailablePositions(B, Ps)',
+                [ cond('length(Ps, N), N == 8')
+                , cond('member((3, 1), Ps)')
+                , cond('member((1, -1), Ps)')
+                , cond('\\+ member((0, -1), Ps)')
+                , cond('\\+ member((1, 1), Ps)')
+           ])
+        ,7, exp('boardSetTest(1, B), getAvailablePositions(B, Ps)',
+                [ cond('length(Ps, N), N == 11')
+                , cond('member((0, -1), Ps)')
+                , cond('member((1, -2), Ps)')
+                , cond('member((1, 2), Ps)')
+                , cond('\\+ member((3, 1), Ps)')
+                , cond('\\+ member((3, 1), Ps)')
+                , cond('\\+ member((0, -2), Ps)')
+           ])
+        ,7, exp('boardSetTest(2, B), getAvailablePositions(B, Ps)',
+                [ cond('length(Ps, N), N == 17')
+                , cond('member((0, 1), Ps)')
+                , cond('member((2, 0), Ps)')
+                , cond('member((4, 2), Ps)')
+                , cond('member((5, 0), Ps)')
+                , cond('\\+ member((1, 1), Ps)')
+                , cond('\\+ member((-1, 1), Ps)')
+                , cond('\\+ member((5, 2), Ps)')
+           ])
+   ]).
+
+tt(findPos, [
+              exp('emptyBoard(B0), tile(5, T), findPositionForTile(B0, T, P, R)', ['P', (0, 0), 'R', 0])
+
+            , sSO('(boardSetTest(0, B), tile(8, T), findPositionForTile(B, T, (X,Y), R))', '(X,Y):R',
+                 [(3,1):0, (3,1):3])
+            , sSO('(boardSetTest(0, B), tile(4, T), findPositionForTile(B, T, (X,Y), R))', '(X,Y):R',
+                 [(0,2):0, (-1,1):1, (-1,1):2, (1,-1):2, (1,-1):3, (1,3):0, (1,3):1, (2,2):0])
+            , sSO('(boardSetTest(0, B), tile(16, T), findPositionForTile(B, T, (X,Y), R))', '(X,Y):R',
+                 [(3,1):0])
+            , sSO('(boardSetTest(0, B), tile(14, T), findPositionForTile(B, T, (X,Y), R))', '(X,Y):R',
+                 [(3,1):0, (2,0):0, (0,0):0, (-1,1):1, (1,-1):0, (1,3):0])
+
+            , sSO('(boardSetTest(1, B), tile(8, T), findPositionForTile(B, T, (X,Y), R))', '(X,Y):R',
+                 [(-2,-1):1, (-2,-1):2, (1,2):2, (1,2):3])
+            , sSO('(boardSetTest(1, B), tile(6, T), findPositionForTile(B, T, (X,Y), R))', '(X,Y):R',
+                 [(1,2):0, (-2,0):0, (-1,-2):1, (-1,1):1, (1,-2):1, (3,0):0])
+            , sSO('(boardSetTest(1, B), tile(2, T), findPositionForTile(B, T, (X,Y), R))', '(X,Y):R',
+                 [(-2,-1):1,(1,2):1,(1,2):2,(1,2):3])
+
+            , sSO('(boardSetTest(1, B), tile(10, T), findPositionForTile(B, T, (X,Y), R))', '(X,Y):R',
+                 [(-2,-1):0,(-2,-1):1,(-2,0):2,(-1,-2):3,(-1,1):1,(1,-2):3,(1,2):2,(2,-1):3,(3,0):0])
+            , sSO('(boardSetTest(1, B), tile(12, T), findPositionForTile(B, T, (X,Y), R))', '(X,Y):R',
+                 [(-2,-1):0,(-2,-1):1,(-2,-1):2,(1,2):2])
+   ]).
 
 
 % boardSetAll(Pieces, Board) - leagă Board la reprezentarea unei table
 % pe care au fost puse piesele din lista Pieces, care contine tupluri
 % (X, Y, IndexPiesa, Rotatie)
 % Foloseste emptyBoard/1 si boardSet/5
-boardSetAll([], Board) :- !, emptyBoard(Board).
-boardSetAll([(X, Y, Index, Rot) | R], Board) :-
-    boardSetAll(R, B), tileRot(Index, Rot, T), boardSet(B, (X, Y), T, Board).
+boardSetAll(L, Board) :- emptyBoard(B0), boardSetAll(L, B0, Board).
+boardSetAll([], Board, Board) :- !.
+boardSetAll([(X, Y, Index, Rot) | R], Board, BoardOut) :-
+    tileRot(Index, Rot, T),
+%    format("Try placing ~w at ~w,~w~n", [T, X, Y]),
+    boardSet(Board, (X, Y), T, Board1),
+    boardSetAll(R, Board1, BoardOut).
 
 % Teste de tipul IndexTest, ListaPiese, unde ListaPiese urmează
 % specificatia de la boardSetAll/2
-boardTiles(0, [ (1, 2, 3, 2), (0, 1, 7, 3), (1, 1, 2, 1), (2, 1, 14, 0),
+boardTiles(0, [ (1, 2, 3, 2), (1, 1, 2, 1), (0, 1, 7, 3), (2, 1, 14, 0),
                 (1, 0, 11, 0)
            ]).
 boardTiles(1, [
                (1, 1, 5, 0),
-               (0, 0, 6, 1), (1, 0, 2, 0), (2, 0, 7, 1),
-               (-1, -1, 11, 0), (1, -1, 13, 2)
+               (1, 0, 2, 0), (0, 0, 6, 1), (-1, 0, 3, 3), (2, 0, 7, 1),
+               (1, -1, 13, 2), (-1, -1, 11, 0)
            ]).
 boardTiles(2, [
                (0, 2, 12, 3), (1, 2, 1, 2), (2, 2, 8, 2), (3, 2, 11, 0),
                               (1, 1, 10, 0),(2, 1, 2, 3), (3, 1, 5, 1), (4, 1, 3, 2),
-               (0, 0, 14, 1), (1, 0, 14, 1),(2, 0, 10, 0),(3, 0, 14, 0),(4, 0, 11,0),
-               (0, -1, 12, 2), (1, -1, 13, 3)
+                              (1, 0, 14, 1),              (3, 0, 14, 0),(4, 0, 11,0),  (0, 0, 14, 1),
+                              (1, -1, 13, 3),  (0, -1, 12, 2)
            ]).
 
 % boardSetTest/2 leagă Board la tabla descrisă de testul Index (vezi

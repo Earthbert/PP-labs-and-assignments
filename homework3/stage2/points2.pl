@@ -12,4 +12,11 @@ vmpoints(Test, Points):-
                , findrot:0
 
                         % etapa 2
+               , setget:25
+               , limits:10
+               , canPlaceA:10
+               , canPlace1:10
+               , canPlace2:10
+               , avPos:30
+               , findPos:25
                     ]).

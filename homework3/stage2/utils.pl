@@ -65,7 +65,7 @@ printBoard(Board) :-
     findall(xtile(X), between(Xm, XM, X), HeadLine),
     append(HeadLine, [none], HL),
     findall(Line, (
-                between(Ym, YM, Y1), Y is YM - Y1 - 1,
+                between(Ym, YM, Y1), Y is YM - (Y1 - Ym),
                 findall(Tile, (between(Xm, XM, X),
                                (   boardGet(Board, (X, Y), Tile) -> true ; Tile = none)
 %                              , format("~w ~w: ~w~n", [X, Y, Tile])
