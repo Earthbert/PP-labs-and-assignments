@@ -1,1 +1,1 @@
-# Programming Paradigms - Labs and Homeworks
+# Programming Paradigms - Labs and Assignments
